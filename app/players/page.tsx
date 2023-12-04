@@ -1,9 +1,9 @@
 'use client';
-import { Button, TextField, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Container, Paper, Typography, ThemeProvider } from '@mui/material';
-import theme from '../components/theme';
-import SectionHeader from '../components/sectionHeader'; // Import the sectionHeader component with proper casing
+import { Button, TextField, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Container, Paper, Typography } from '@mui/material';
+import SectionHeader from '../components/sectionHeader';
 import React, { useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 
 type Player = {
   id: number;
@@ -20,17 +20,16 @@ export default function Players() {
 
   const handleAddPlayer = () => {
     const newPlayer: Player = {
-      id: players.length + 1, // This is a simple ID assignment, replace with your own ID logic
+      id: players.length + 1, 
       name: newPlayerName,
     };
     setPlayers([...players, newPlayer]);
-    setNewPlayerName(''); // Clear the input field
+    setNewPlayerName(''); 
   };
 
     return (
-      <ThemeProvider theme={theme}>
         <Container maxWidth="sm" className='containerRoot'>
-          <SectionHeader name="Players" /> {/* Use the imported SectionHeader component */}
+          <SectionHeader name="Players"> <PeopleAltIcon /> </SectionHeader>{/* Use the imported SectionHeader component */}
           <Paper elevation={3} style={{ margin: '16px 0', padding: '16px' }}>
         <Typography variant="h5">Current Players</Typography>
         <List>
@@ -61,6 +60,5 @@ export default function Players() {
         </Button>
       </Paper>
         </Container>
-      </ThemeProvider>
     );
 }

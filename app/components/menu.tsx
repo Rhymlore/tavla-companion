@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 export default function MenuButtons() {
   return (
-    <Grid container spacing={2} marginTop={1}>
+    <Grid container spacing={2}>
       <Grid item xs={12}>
       <Link href={'/newgame'} style={{ color: 'inherit' }}>
         <Button variant="contained" color="primary" fullWidth>
