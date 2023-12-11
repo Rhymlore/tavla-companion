@@ -1,11 +1,9 @@
-'use client'
-import AppShell from './homePage';
+import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box'
 
-export default function Home() {
-
-  return (
-    <Box 
+const leaderboard = () => {
+    return (
+        <Box 
         sx={{
           textAlign:"center", 
           '& button': { m: 2 }, 
@@ -17,7 +15,9 @@ export default function Home() {
           height: '100vh',
           justifyContent: 'space-around'
         }}>
-      <AppShell/>
-    </Box>
-  )
+            <Typography variant='h1'>Leaderboard</Typography>
+        </Box>
+        );
 }
+
+export default leaderboard;
