@@ -1,43 +1,64 @@
 'use client'
 import SectionHeader from '../components/sectionHeader'; 
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Container, Typography } from '@mui/material';
-import { ChangeEvent, useState } from 'react';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Container, Typography, Paper, Link } from '@mui/material';
+import { ChangeEvent, useState, useEffect } from 'react';
 import CasinoIcon from '@mui/icons-material/Casino';
+import localforage from 'localforage';
 
-type Player = string;
+type Player = {
+  id: number;
+  name: string;
+};
 
 export default function NewGame() {
-  const [playerOne, setPlayerOne] = useState<Player>('');
-  const [playerTwo, setPlayerTwo] = useState<Player>('');
+  const [playerOne, setPlayerOne] = useState<Player | null>(null);
+  const [playerTwo, setPlayerTwo] = useState<Player | null>(null);
 
-  // Dummy player list - replace this with actual player data
-  const players: Player[] = ['Alice', 'Bob', 'Charlie', 'Diana'];
+  const [players, setPlayers] = useState<Player[]>([]);
 
-  const handlePlayerChange = (event: ChangeEvent<{ value: unknown }>, playerSetter: React.Dispatch<React.SetStateAction<Player>>) => {
-    playerSetter(event.target.value as Player);
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      const storedPlayers: Player[] | null = await localforage.getItem('players');
+      if (storedPlayers) {
+        setPlayers(storedPlayers);
+      }
+    };
+
+    fetchPlayers();
+  }, []);
+
+  const handlePlayerChange = (event: ChangeEvent<{ value: unknown }>, playerSetter: React.Dispatch<React.SetStateAction<Player | null>>, playerName:string) => {
+    const selectedPlayer = players.find(player => player.name === event.target.value);
+    if (selectedPlayer) {
+      playerSetter(selectedPlayer);
+      localforage.setItem(playerName, selectedPlayer.name);
+    }
   };
 
-  const handleStartGame = () => {
-    console.log(`Starting game with players: ${playerOne} and ${playerTwo}`);
-  };
+  const choosePlayerWarning = () => {
+    alert("Please choose two players to start the new game");
+  }
+
     return (
       <Container maxWidth="sm" className='containerRoot'>
-        <SectionHeader name="New Game"> <CasinoIcon/> </SectionHeader> {/* Use the imported SectionHeader component */}
-        <Box sx={{ my: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <SectionHeader name="New Game" url='/'> <CasinoIcon/> </SectionHeader> {/* Use the imported SectionHeader component */}
+        <Box sx={{ my: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Paper elevation={3} style={{ padding: '16px', width:"100%" }}>
         <Typography variant="h5" component="div" sx={{ flexGrow: 1, textAlign: 'center', mb: 4}}>
           Select two players from the list below to start a new game.
         </Typography>
+        
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel id="player-one-label">Player One</InputLabel>
           <Select
             labelId="player-one-label"
             id="player-one"
-            value={playerOne}
-            label="Player One"
-            onChange={(e) => handlePlayerChange(e, setPlayerOne)}
+            value={playerOne ? playerOne.name : ''}
+            label={playerOne ? playerOne.name : ''}
+            onChange={(e) => handlePlayerChange(e, setPlayerOne, "playerOne")}
           >
-            {players.map((player, index) => (
-              <MenuItem key={index} value={player}>{player}</MenuItem>
+            {players.map((player) => (
+              <MenuItem key={player.id} value={player.name}>{player.name}</MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -47,19 +68,29 @@ export default function NewGame() {
           <Select
             labelId="player-two-label"
             id="player-two"
-            value={playerTwo}
-            label="Player Two"
-            onChange={(e) => handlePlayerChange(e, setPlayerTwo)}
+            value={playerTwo ? playerTwo.name : ''}
+            label={playerTwo ? playerTwo.name : ''}
+            onChange={(e) => handlePlayerChange(e, setPlayerTwo, "playerTwo")}
           >
-            {players.map((player, index) => (
-              <MenuItem key={index} value={player}>{player}</MenuItem>
+            {players
+              .filter((player) => playerOne ? player.name !== playerOne.name : true)
+              .map((player) => (
+                <MenuItem key={player.id} value={player.name}>{player.name}</MenuItem>
             ))}
           </Select>
         </FormControl>
-
-        <Button variant="contained" color="primary" onClick={handleStartGame}>
+        </Paper>
+        {(!playerOne || !playerTwo) ? 
+        <Button variant="contained" color="primary" size='large' sx={{ my: 3 }} onClick={choosePlayerWarning}>
           Start Game
         </Button>
+        :
+        <Link href={'/game'} style={{ color: 'inherit' }}>
+          <Button variant="contained" color="primary" size='large' sx={{ my: 3 }} fullWidth>
+            Start Game
+          </Button>
+        </Link>
+      }
       </Box>
       </Container>
     );
