@@ -1,10 +1,10 @@
 'use client'
 import React, {useEffect, useState} from 'react';
-import { Grid, Button, Typography, Container, Box, Divider } from '@mui/material';
+import { Grid, Button, Typography, Container, Box} from '@mui/material';
 import SectionHeader from '../components/sectionHeader';
-import Timer from '../components/timer';
 import localforage from 'localforage';
 import { PlayerStats } from '../types/types';
+import GameResults from '../components/gameResults';
 
 const initialPlayerStats: PlayerStats = {
   turn: 0,
@@ -192,7 +192,7 @@ const GamePage: React.FC = () => {
             </Grid>
           </Grid>
       </Box>
-      <Timer />
+      <GameResults />
       <Box>
         <Typography variant="h4" gutterBottom align='center'>{playerTwo} | Turns: {playerTwoStats.turn}</Typography>
         <Box sx={{ color: 'gray', display: 'flex', justifyContent: 'space-around', mb:2}}>

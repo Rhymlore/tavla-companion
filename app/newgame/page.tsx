@@ -79,18 +79,19 @@ export default function NewGame() {
             ))}
           </Select>
         </FormControl>
-        </Paper>
         {(!playerOne || !playerTwo) ? 
-        <Button variant="contained" color="primary" size='large' sx={{ my: 3 }} onClick={choosePlayerWarning}>
+        <Button variant="contained" color="primary" sx={{ my: 3 }} onClick={choosePlayerWarning} fullWidth>
           Start Game
         </Button>
         :
         <Link href={'/game'} style={{ color: 'inherit' }}>
-          <Button variant="contained" color="primary" size='large' sx={{ my: 3 }} fullWidth>
+          <Button variant="contained" color="primary" sx={{ my: 3 }} fullWidth>
             Start Game
           </Button>
         </Link>
-      }
+        }
+        </Paper>
+        
       </Box>
       </Container>
     );

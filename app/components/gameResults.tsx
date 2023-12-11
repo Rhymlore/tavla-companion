@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import localforage from 'localforage';
-import { DialogContent, Button, DialogTitle, DialogActions, Dialog, Link, Snackbar, Alert } from '@mui/material';
+import { DialogContent, Button, DialogTitle, DialogActions, Dialog, Link, Snackbar, Grid, Typography} from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 import { PlayerStats } from '../types/types';
 import { saveGameToCloud } from '../tca-cloud-api';
+import Timer from './timer';
 
 const GameResults = () => {
     const initialPlayerStats: PlayerStats = {
@@ -130,10 +131,13 @@ const GameResults = () => {
     };
 
     return (
-        <>
-            <Button variant="contained" fullWidth onClick={handleFirstDialog}>
-            Finish Game
-            </Button>
+        <Grid sx={{ border: 1, borderColor: 'divider', my: 3, p: 2 }}>
+            <Timer> 
+                <Button variant="contained" fullWidth onClick={handleFirstDialog}>
+                    Finish Game
+                </Button>
+            </Timer>
+
             <Dialog open={firstDialog} onClose={handleFinishGame}>
             <DialogTitle>Who won the game?</DialogTitle>
             <DialogActions sx={{display:"flexbox", flexDirection:"row", justifyContent:"center"}}>
@@ -142,17 +146,18 @@ const GameResults = () => {
             </DialogActions>
             </Dialog>
             <Dialog open={secondDialog}>
-            <DialogTitle>Congratulations!</DialogTitle>
+            <DialogTitle textAlign={"center"}>{winnerPlayer} is the winner!</DialogTitle>
             <DialogContent>
-                <p>Would you like to play again go back to the main menu? Don't forget to save your game!</p> 
+            <Typography variant="body1" gutterBottom align='center'>Would you like to play again go back to the main menu?</Typography>
+            <Typography variant="body1" gutterBottom align='center' sx={{fontWeight:"500"}}>Don't forget to save your game!</Typography> 
             </DialogContent>
             <DialogActions sx={{display:"flexbox", flexDirection:"row", justifyContent:"center"}}>
                 <Button onClick={handleSaveGame}>Save Game</Button>
                 <Snackbar 
                 open={snackbarOpen} 
                 autoHideDuration={6000}
-                onClose={handleClose}
-                severity={snackbarSeverity}
+                onClose={(event: React.SyntheticEvent<Element, Event> | Event, reason) => handleClose(event as React.SyntheticEvent<Element, Event>, "clickaway")}
+                color={snackbarSeverity}
                 message={snackbarMessage}
                 />
 
@@ -160,7 +165,7 @@ const GameResults = () => {
                 <Button><Link href="/" underline='none'>Go Back</Link></Button>
             </DialogActions>
             </Dialog>
-        </>
-    );
+        </Grid>
+        );
 };
 export default GameResults;

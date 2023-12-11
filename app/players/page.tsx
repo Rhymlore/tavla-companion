@@ -62,7 +62,7 @@ export default function Players() {
             </List>
           </Paper>
           <Paper elevation={3} style={{ margin: '16px 0', padding: '16px' }}>
-            <Typography variant="h5">Add New Player</Typography>
+            <Typography variant="h5" sx={{mb:3}}>Add New Player</Typography>
             <TextField
               label="Player Name"
               value={newPlayerName}
