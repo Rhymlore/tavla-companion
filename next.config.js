@@ -7,6 +7,7 @@ const nextConfig = {
       path: '',
   },
   assetPrefix: '/',
+  output: 'standalone',
 };
 
 module.exports = nextConfig;
