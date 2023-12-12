@@ -3,8 +3,7 @@
  */
 const nextConfig = {
   images: {
-      loader: 'default',
-      path: '/',
+    unoptimized: true,
   },
   assetPrefix: '/',
   output: 'export',

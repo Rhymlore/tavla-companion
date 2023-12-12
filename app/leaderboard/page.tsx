@@ -7,10 +7,11 @@ import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import { loadGamesFromCloud } from '../tca-cloud-api';
 import localforage from 'localforage';
 import { PlayerStatistics, GameResult } from '../types/types';
+import Image from 'next/image'
 
 export default function Leaderboard() {
-  const [playerStats, setPlayerStats] = useState<PlayerStatistics[]>([]);
-  const appName = 'tavla-companion-fall-2023';
+    const [playerStats, setPlayerStats] = useState<PlayerStatistics[]>([]);
+    const appName = 'tavla-companion-fall-2023';
 
   useEffect(() => {
     const fetchData = async () => {
