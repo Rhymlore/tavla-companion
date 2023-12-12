@@ -91,11 +91,7 @@ const GameResults = () => {
         return () => { 
             ignore = true; 
         };
-        }, []);
-    
-    useEffect(() => {
-        console.log(gameResultsData);
-    }, [winnerPlayer, email, time, playerOne, playerTwo, playerOneStats, playerTwoStats])
+        }, [initialPlayerStats.double, initialPlayerStats.hit, initialPlayerStats.noPlay, initialPlayerStats.turn]);
 
     const handleFirstDialog = () => {
     firstDialog ? setFirstDialog(false) : setFirstDialog(true)
@@ -149,7 +145,7 @@ const GameResults = () => {
             <DialogTitle textAlign={"center"}>{winnerPlayer} is the winner!</DialogTitle>
             <DialogContent>
             <Typography variant="body1" gutterBottom align='center'>Would you like to play again go back to the main menu?</Typography>
-            <Typography variant="body1" gutterBottom align='center' sx={{fontWeight:"500"}}>Don't forget to save your game!</Typography> 
+            <Typography variant="body1" gutterBottom align='center' sx={{fontWeight:"500"}}>Dont forget to save your game!</Typography> 
             </DialogContent>
             <DialogActions sx={{display:"flexbox", flexDirection:"row", justifyContent:"center"}}>
                 <Button onClick={handleSaveGame}>Save Game</Button>

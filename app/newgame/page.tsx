@@ -1,6 +1,6 @@
 'use client'
 import SectionHeader from '../components/sectionHeader'; 
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Container, Typography, Paper, Link } from '@mui/material';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Container, Typography, Paper, Link, SelectChangeEvent } from '@mui/material';
 import { ChangeEvent, useState, useEffect } from 'react';
 import CasinoIcon from '@mui/icons-material/Casino';
 import localforage from 'localforage';
@@ -27,7 +27,7 @@ export default function NewGame() {
     fetchPlayers();
   }, []);
 
-  const handlePlayerChange = (event: ChangeEvent<{ value: unknown }>, playerSetter: React.Dispatch<React.SetStateAction<Player | null>>, playerName:string) => {
+  const handlePlayerChange = (event: SelectChangeEvent, playerSetter: React.Dispatch<React.SetStateAction<Player | null>>, playerName:string) => {
     const selectedPlayer = players.find(player => player.name === event.target.value);
     if (selectedPlayer) {
       playerSetter(selectedPlayer);
