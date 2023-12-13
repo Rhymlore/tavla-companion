@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { Typography, Button, Grid } from '@mui/material';
 import CasinoIcon from '@mui/icons-material/Casino';
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import Link from 'next/link';
 import localforage from 'localforage';
