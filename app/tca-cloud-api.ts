@@ -1,12 +1,12 @@
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-import { GameResultsData } from './types/types';
+import { GameResultProps } from './types/types';
 
 
 export const saveGameToCloud = async (
   email: string
   , appName: string
   , timestamp: string
-  , gameResult: GameResultsData
+  , gameResult: GameResultProps
 ) => {
 
     const dynamoGame = {

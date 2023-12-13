@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import localforage from 'localforage';
 import { DialogContent, Button, DialogTitle, DialogActions, Dialog, Link, Snackbar, Grid, Typography} from '@mui/material';
-import { v4 as uuidv4 } from 'uuid';
-import { PlayerStats } from '../types/types';
+import { PlayerStats, GameResultProps, GameTime, Player } from '../types/types';
 import { saveGameToCloud } from '../tca-cloud-api';
-import Timer from './timer';
 
 const GameResults = () => {
+
     const initialPlayerStats: PlayerStats = {
         turn: 0,
         hit: 0,
@@ -16,83 +15,104 @@ const GameResults = () => {
 
     const [firstDialog, setFirstDialog] = useState(false);
     const [secondDialog, setSecondDialog] = useState(false);
-    const [playerOne, setPlayerOne] = useState<string>('');
-    const [playerTwo, setPlayerTwo] = useState<string>('');
+    const [players, setPlayers] = useState<Player[]>([]);
     const [playerOneStats, setPlayerOneStats] = useState<PlayerStats>(initialPlayerStats);
     const [playerTwoStats, setPlayerTwoStats] = useState<PlayerStats>(initialPlayerStats);
     const [winnerPlayer, setWinnerPlayer] = useState<string>('');
     const [email, setEmail] = useState<string>('');
-    const [time, setTime] = useState<number>(0);
+    const [gameTime, setGameTime] = useState<GameTime>({ start: '', end: '' });
 
     const timestamp = new Date().toISOString();
     const appName = 'tavla-companion-fall-2023';
-    const gameId = uuidv4();
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
     
-    const gameResultsData = {
-            gameId: gameId,
-            players: {
-            playerOne: playerOne, 
-            playerTwo: playerTwo, 
-            },
-            gameDuration: time, 
-            playerOneStats: {
-            turn: playerOneStats.turn,
-            hit: playerOneStats.hit,
-            double: playerOneStats.double,
-            noPlay: playerOneStats.noPlay,
-            },
-            playerTwoStats: {
-            turn: playerTwoStats.turn,
-            hit: playerTwoStats.hit,
-            double: playerTwoStats.double,
-            noPlay: playerTwoStats.noPlay,
-            },
-            winnerPlayer: winnerPlayer, 
-        };
+    const gameResultsData: GameResultProps = {
+        start: gameTime.start,
+	    end: gameTime.end,
+	    winner: winnerPlayer,
+	    players: players,
+	    turns: [playerOneStats, playerTwoStats]
+    };
+    
+    const setWinnerPlayerOnClick = (winnerPlayer: string) => {
+        setWinnerPlayer(winnerPlayer);
+        localforage.setItem('winnerPlayer', winnerPlayer);
+    }
 
     useEffect(() => {
         let ignore = false;
         
-        const loadData = async () => {
+        const selectedPlayers = async () => {
+            const selectedPlayers: Player[] | null = await localforage.getItem<Player[]>('selectedPlayers') ?? [];
             if (!ignore) {
-            const loadedPlayerOne = await localforage.getItem<string>('playerOne') ?? '';
-            const loadedPlayerTwo = await localforage.getItem<string>('playerTwo') ?? '';
-            const loadedPlayerOneStats = {
-                turn: await localforage.getItem<number>('playerOne.turn') ?? initialPlayerStats.turn,
-                hit: await localforage.getItem<number>('playerOne.hit') ?? initialPlayerStats.hit,
-                double: await localforage.getItem<number>('playerOne.double') ?? initialPlayerStats.double,
-                noPlay: await localforage.getItem<number>('playerOne.noPlay') ?? initialPlayerStats.noPlay,
-            };
-            const loadedPlayerTwoStats = {
-                turn: await localforage.getItem<number>('playerTwo.turn') ?? initialPlayerStats.turn,
-                hit: await localforage.getItem<number>('playerTwo.hit') ?? initialPlayerStats.hit,
-                double: await localforage.getItem<number>('playerTwo.double') ?? initialPlayerStats.double,
-                noPlay: await localforage.getItem<number>('playerTwo.noPlay') ?? initialPlayerStats.noPlay,
+              setPlayers(selectedPlayers);
             }
-            const loadedWinnerPlayer = await localforage.getItem<string>('winnerPlayer') ?? '';
-            const loadedEmail = await localforage.getItem<string>('email') ?? '';
-            const loadedTime = await localforage.getItem<number>('time') ?? 0;
-
-            setPlayerOne(loadedPlayerOne);
-            setPlayerTwo(loadedPlayerTwo);
-            setPlayerOneStats(loadedPlayerOneStats);
-            setPlayerTwoStats(loadedPlayerTwoStats);
-            setWinnerPlayer(loadedWinnerPlayer);
-            setEmail(loadedEmail);
-            setTime(loadedTime);
+          };
+        const playerOneStats = async () => {
+            const loadedPlayerOneStats = await localforage.getItem<PlayerStats>('playerOneStats');
+            if (!ignore) {
+                setPlayerOneStats(loadedPlayerOneStats ?? initialPlayerStats);
             }
         };
+        const playerTwoStats = async () => {
+            const loadedPlayerTwoStats = await localforage.getItem<PlayerStats>('playerTwoStats');
+            if (!ignore) {
+                setPlayerTwoStats(loadedPlayerTwoStats ?? initialPlayerStats);
+            }
+        };
+
+        const email = async () => {
+            const loadedEmail = await localforage.getItem<string>('email');
+            if (!ignore) {
+                setEmail(loadedEmail ?? '');
+            }
+        }
         
-        loadData();
-        
+        selectedPlayers();
+        playerOneStats();
+        playerTwoStats();
+        email();
+
         return () => { 
             ignore = true; 
         };
-        }, [initialPlayerStats.double, initialPlayerStats.hit, initialPlayerStats.noPlay, initialPlayerStats.turn]);
+        }, []);
 
+    useEffect(() => {
+        setStartTimeOnClick();
+        }, []);
+    
+    useEffect(() => {
+        const gameResultsData = {
+            start: gameTime.start,
+            end: gameTime.end,
+            winner: winnerPlayer,
+            players: players,
+            turns: [playerOneStats, playerTwoStats]
+        };
+        // Save to localForage if needed, or use it for other purposes
+        localforage.setItem('gameResults', gameResultsData);
+    }, [gameTime, winnerPlayer, players, playerOneStats, playerTwoStats]);
+
+    const setStartTimeOnClick = () => {
+        const newGameTime = {
+            ...gameTime,
+            start: new Date().toISOString(),
+        };
+        setGameTime(newGameTime);
+        localforage.setItem('gameTime', newGameTime);
+        };
+    const setEndTimeOnClick = () => {
+        const newGameTime = {
+            ...gameTime,
+            end: new Date().toISOString(),
+        };
+        setGameTime(newGameTime);
+        localforage.setItem('gameTime', newGameTime);
+        };
+        
     const handleFirstDialog = () => {
     firstDialog ? setFirstDialog(false) : setFirstDialog(true)
     };
@@ -103,13 +123,14 @@ const GameResults = () => {
 
     const handleFinishGame = (winnerPlayer: string) => {
     handleFirstDialog();
-    localforage.setItem('winnerPlayer', winnerPlayer);
+    setWinnerPlayerOnClick(winnerPlayer);
+    setEndTimeOnClick();
     handleSecondDialog();
     };
 
     const handleSaveGame = async () => {
         try {
-            await saveGameToCloud(appName, timestamp, email, gameResultsData);
+            await saveGameToCloud(email, appName, timestamp, gameResultsData);
             setSnackbarMessage('Game saved successfully!');
             setSnackbarSeverity('success');
         } catch (error) {
@@ -117,6 +138,7 @@ const GameResults = () => {
             setSnackbarSeverity('error');
         }
         setSnackbarOpen(true);
+        console.log (gameResultsData);
     };
 
     const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
@@ -126,19 +148,34 @@ const GameResults = () => {
         setSnackbarOpen(false);
     };
 
+    async function clearLocalForage() {
+        try {
+          const keysToKeep = ['players', 'email', 'selectedPlayers'];
+          const allKeys = await localforage.keys();
+      
+          for (const key of allKeys) {
+            if (!keysToKeep.includes(key)) {
+              await localforage.removeItem(key);
+            }
+          }
+      
+          console.log('Game results has been cleared');
+        } catch (err) {
+          console.error('Error during selective clearing:', err);
+        }
+        window.location.reload();
+      }
+
     return (
         <Grid sx={{ border: 1, borderColor: 'divider', my: 3, p: 2 }}>
-            <Timer> 
-                <Button variant="contained" fullWidth onClick={handleFirstDialog}>
+            <Button variant="contained" fullWidth onClick={handleFirstDialog}>
                     Finish Game
-                </Button>
-            </Timer>
-
+            </Button>
             <Dialog open={firstDialog} onClose={handleFinishGame}>
             <DialogTitle>Who won the game?</DialogTitle>
             <DialogActions sx={{display:"flexbox", flexDirection:"row", justifyContent:"center"}}>
-                <Button onClick={() => handleFinishGame(playerOne)}>{playerOne}</Button>
-                <Button onClick={() => handleFinishGame(playerTwo)}>{playerTwo}</Button>
+                <Button onClick={() => handleFinishGame(players[0].name)}>{players[0]?.name || 'No Player Selected'}</Button>
+                <Button onClick={() => handleFinishGame(players[1].name)}>{players[1]?.name || 'No Player Selected'}</Button>
             </DialogActions>
             </Dialog>
             <Dialog open={secondDialog}>
@@ -157,7 +194,7 @@ const GameResults = () => {
                 message={snackbarMessage}
                 />
 
-                <Button onClick={() => window.location.reload()}>Play Again!</Button>
+                <Button onClick={() => clearLocalForage()}>Play Again!</Button>
                 <Button><Link href="/" underline='none'>Go Back</Link></Button>
             </DialogActions>
             </Dialog>

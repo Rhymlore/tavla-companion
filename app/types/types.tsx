@@ -4,34 +4,40 @@ export type PlayerStats = {
     double: number;
     noPlay: number;
   };
-export type GameResultsData = {
-        gameId: string;
-        players: {
-            playerOne: string;
-            playerTwo: string;
-        };
-        gameDuration: number;
-        playerOneStats: PlayerStats;
-        playerTwoStats: PlayerStats;
-        winnerPlayer: string;
+
+export type GameTime = {
+    start: string;
+    end: string;
+}
+
+export type Player = {
+id: number;
+name: string;
 };
 
 export type PlayerStatistics = {
     name: string;
     wins: number;
     losses: number;
+    turn: number;
+    double: number;
+    hit: number;
+    noPlay: number;
+    totalDouble: number;
+    totalHit: number;
+    totalNoPlay: number;
     totalTurns: number;
     doubleRate: string;
     hitRate: string;
     noPlayRate: string;
 };
 
-export type GameResult = {
-    playerOne: string;
-    playerTwo: string;
-    winnerPlayer: string;
-    playerOneStats: PlayerStatDetails;
-    playerTwoStats: PlayerStatDetails;
+export interface GameResultProps {
+	start: GameTime['start'];
+	end: GameTime['end'];
+	winner: string;
+	players: Player[];
+	turns: PlayerStats[];
 };
 
 export type PlayerStatDetails = {

@@ -38,14 +38,6 @@ export default function MenuButtons() {
         </Link>
       </Grid>
       <Grid item xs={12}>
-      <Link href={'/players'} style={{ color: 'inherit' }}>
-        <Button variant="contained" color="primary" fullWidth>
-            <PeopleAltIcon/>   
-            <Typography variant="h6"> Players</Typography>  
-        </Button>
-        </Link>
-      </Grid>
-      <Grid item xs={12}>
         <Link href={'/leaderboard'} style={{ color: 'inherit' }}>
         <Button variant="contained" color="primary" fullWidth>
             <LeaderboardIcon/>

@@ -3,8 +3,9 @@ import React, {useEffect, useState} from 'react';
 import { Grid, Button, Typography, Container, Box} from '@mui/material';
 import SectionHeader from '../components/sectionHeader';
 import localforage from 'localforage';
-import { PlayerStats } from '../types/types';
+import { PlayerStats, Player, GameTime } from '../types/types';
 import GameResults from '../components/gameResults';
+import { Play } from 'next/font/google';
 
 const initialPlayerStats: PlayerStats = {
   turn: 0,
@@ -14,136 +15,57 @@ const initialPlayerStats: PlayerStats = {
 };
 
 const GamePage: React.FC = () => {
-  const [playerOne, setPlayerOne] = useState<string>('');
-  const [playerTwo, setPlayerTwo] = useState<string>('');
+  const [players, setPlayers] = useState<Player[]>([]);
   const [playerOneStats, setPlayerOneStats] = useState<PlayerStats>(initialPlayerStats);
   const [playerTwoStats, setPlayerTwoStats] = useState<PlayerStats>(initialPlayerStats);
+  const [gameTime, setGameTime] = useState<GameTime>({ start: '', end: '' });
 
-  const increasePlayerOneTurns = () => {
-    setPlayerOneStats(prevStats => {
-      const newTurnCount = playerOneStats.turn + 1;
-      localforage.setItem('playerOne.turn', newTurnCount);
-      return {
-      ...prevStats,
-      turn: newTurnCount,
-      }
+  const increasePlayerOneStat = (stat: keyof PlayerStats) => {
+    setPlayerOneStats(prevState => {
+      const newState = { ...prevState };
+      newState[stat] += 1;
+      localforage.setItem('playerOneStats', newState);
+      return newState;
     });
   }
 
-  const increasePlayerOneHit = () => {
-    setPlayerOneStats(prevStats => {
-      const newHitCount = playerOneStats.hit + 1;
-      localforage.setItem('playerOne.hit', newHitCount);
-
-      return {
-      ...prevStats,
-      hit: newHitCount,
-    }
-    });
-  };
-  
-  const increasePlayerOneDouble = () => {
-    setPlayerOneStats(prevStats => {
-      const newDoubleCount = prevStats.double + 1;
-      localforage.setItem('playerOne.double', newDoubleCount);
-  
-      return {
-        ...prevStats,
-        double: newDoubleCount,
-      };
-    });
-  };
-  
-  const increasePlayerOneNoPlay = () => {
-    setPlayerOneStats(prevStats => {
-      const newNoPlayCount = prevStats.noPlay + 1;
-      localforage.setItem('playerOne.noPlay', newNoPlayCount);
-  
-      return {
-        ...prevStats,
-        noPlay: newNoPlayCount,
-      };
-    });
+  const increasePlayerTwoStat = (stat: keyof PlayerStats) => {
+    setPlayerTwoStats(prevState => {
+      const newState = { ...prevState };
+      newState[stat] += 1;
+      localforage.setItem('playerTwoStats', newState);
+      return newState;
+    });  
   };
 
-  const increasePlayerTwoTurns = () => {
-    setPlayerTwoStats(prevStats => {
-      const newTurnCount = playerTwoStats.turn + 1;
-      localforage.setItem('playerTwo.turn', newTurnCount);
-      return {
-      ...prevStats,
-      turn: newTurnCount,
-      }
-    });
-  }
-
-  
-  const increasePlayerTwoHit = () => {
-    setPlayerTwoStats(prevStats => {
-      const newHitCount = prevStats.hit + 1;
-      localforage.setItem('playerTwo.hit', newHitCount);
-  
-      return {
-        ...prevStats,
-        hit: newHitCount,
-      };
-    });
-  };
-  
-  const increasePlayerTwoDouble = () => {
-    setPlayerTwoStats(prevStats => {
-      const newDoubleCount = prevStats.double + 1;
-      localforage.setItem('playerTwo.double', newDoubleCount);
-  
-      return {
-        ...prevStats,
-        double: newDoubleCount,
-      };
-    });
-  };
-  
-  const increasePlayerTwoNoPlay = () => {
-    setPlayerTwoStats(prevStats => {
-      const newNoPlayCount = prevStats.noPlay + 1;
-      localforage.setItem('playerTwo.noPlay', newNoPlayCount);
-  
-      return {
-        ...prevStats,
-        noPlay: newNoPlayCount,
-      };
-    });
+  const loadSelectedPlayers = async () => {
+    return await localforage.getItem<Player[]>('selectedPlayers') ?? [];
   };
 
   useEffect(() => {
+    let ignore = false;
 
-      const loadPlayerOne = async () => {
-        if (!ignore) {
-          setPlayerOne(await localforage.getItem<string>('playerOne') ?? '') 
-        }
-      };
-      const loadPlayerTwo = async () => {
-        if (!ignore) {
-          setPlayerTwo(await localforage.getItem<string>('playerTwo') ?? '') 
-        }
-      };
-      let ignore = false;
-      loadPlayerOne();
-      loadPlayerTwo();
+    const loadPlayerData = async () => {
+      const selectedPlayers: Player[] | null = await loadSelectedPlayers();
+      if (!ignore) {
+        setPlayers(selectedPlayers);
+      }
+    };
+    loadPlayerData();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
-      return (
-          () => { 
-              ignore = true; 
-          }
-      );
-  }, []
-  );
+  
+
 
   return (
     <Container maxWidth="sm" className='containerRoot'>
     <SectionHeader name="Game Time" url='/newgame'> </SectionHeader>
     <Container>
       <Box sx={{ mt: 3 }}>
-          <Typography variant="h4" gutterBottom align='center'>{playerOne} | Turns: {playerOneStats.turn}</Typography>
+          <Typography variant="h4" gutterBottom align='center'>{players[0]?.name || 'Loading...'} | Turns: {playerOneStats.turn}</Typography>
           <Box sx={{ color: 'gray', display: 'flex', justifyContent: 'space-around', mb:2 }}>
             <Typography variant="body1">Doubles: {playerOneStats.double}</Typography>
             <Typography variant="body1">Hits: {playerOneStats.hit}</Typography>
@@ -154,7 +76,7 @@ const GamePage: React.FC = () => {
               <Button 
                 variant="contained" 
                 fullWidth 
-                onClick={increasePlayerOneTurns}
+                onClick={() => increasePlayerOneStat('turn')}
               >
                 <Typography variant='h6'>Rolled!</Typography>
               </Button>
@@ -164,7 +86,7 @@ const GamePage: React.FC = () => {
                 <Button 
                   variant="outlined" 
                   fullWidth 
-                  onClick={increasePlayerOneDouble}
+                  onClick={() => increasePlayerOneStat('double')}
                 >
                   <Typography variant='h6'>Double</Typography> 
                 </Button>
@@ -174,7 +96,7 @@ const GamePage: React.FC = () => {
                   variant="outlined" 
                   color='success' 
                   fullWidth 
-                  onClick={increasePlayerOneHit}
+                  onClick={() => increasePlayerOneStat('hit')}
                 >
                   <Typography variant='h6'>Hit</Typography> 
                 </Button>
@@ -184,7 +106,7 @@ const GamePage: React.FC = () => {
                   variant="outlined" 
                   color='warning' 
                   fullWidth 
-                  onClick={increasePlayerOneNoPlay}
+                  onClick={() => increasePlayerOneStat('noPlay')}
                 >
                   <Typography variant='h6'>No Play</Typography> 
                 </Button>
@@ -194,7 +116,7 @@ const GamePage: React.FC = () => {
       </Box>
       <GameResults />
       <Box>
-        <Typography variant="h4" gutterBottom align='center'>{playerTwo} | Turns: {playerTwoStats.turn}</Typography>
+        <Typography variant="h4" gutterBottom align='center'>{players[1]?.name || 'Loading...'} | Turns: {playerTwoStats.turn}</Typography>
         <Box sx={{ color: 'gray', display: 'flex', justifyContent: 'space-around', mb:2}}>
           <Typography variant="body1">Doubles: {playerTwoStats.double}</Typography>
           <Typography variant="body1">Hits: {playerTwoStats.hit}</Typography>
@@ -205,7 +127,7 @@ const GamePage: React.FC = () => {
             <Button 
               variant="contained" 
               fullWidth 
-              onClick={increasePlayerTwoTurns}
+              onClick={() => increasePlayerTwoStat('turn')}
             >
               <Typography variant='h6'>Rolled!</Typography>
             </Button>
@@ -215,7 +137,7 @@ const GamePage: React.FC = () => {
               <Button 
                 variant="outlined" 
                 fullWidth 
-                onClick={increasePlayerTwoDouble}
+                onClick={() => increasePlayerTwoStat('double')}
               >
                 <Typography variant='h6'>Double</Typography> 
               </Button>
@@ -225,7 +147,7 @@ const GamePage: React.FC = () => {
                 variant="outlined" 
                 color='success' 
                 fullWidth 
-                onClick={increasePlayerTwoHit}
+                onClick={() => increasePlayerTwoStat('hit')}
               >
                 <Typography variant='h6'>Hit</Typography> 
               </Button>
@@ -235,7 +157,7 @@ const GamePage: React.FC = () => {
                 variant="outlined" 
                 color='warning' 
                 fullWidth 
-                onClick={increasePlayerTwoNoPlay}
+                onClick={() => increasePlayerTwoStat('noPlay')}
               >
                 <Typography variant='h6'>No Play</Typography> 
               </Button>
